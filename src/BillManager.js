@@ -10,7 +10,7 @@ function BillManager() {
 
   return (
     <div>
-      <h3>Hello Bill Manager</h3>
+      <h3>Hello Welcome to Bill Manager</h3>
       <button onClick={() => inputFile.current.click()}>Upload File</button>
       <input
         type="file"
