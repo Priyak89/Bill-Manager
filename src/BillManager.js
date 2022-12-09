@@ -1,5 +1,5 @@
 import React, { Component, useRef, useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { json, Link } from "react-router-dom";
 // import "./BillManager.css";
 
 function BillManager() {
@@ -17,9 +17,10 @@ function BillManager() {
       }
 
       const records = await response.json();
+
       setRecords(records);
     }
-
+    console.log(records);
     getRecords();
 
     return;
@@ -28,6 +29,14 @@ function BillManager() {
     setFile([...file, e.target.files[0]]);
     // This method fetches the records from the database.
   };
+  const listItems = records.map((record) => {
+    return <li key={record._id}>{JSON.stringify(record)}</li>;
+  });
+  //const listItems[id,name,age]=records;
+  // function dataDisplay(recordArr) {
+  //   const data[id,name,age] = recordArr;
+  //   return data[];
+  // }
 
   return (
     <div>
@@ -40,7 +49,7 @@ function BillManager() {
         hidden="true"
       ></input>
       <h3>Selected Files:</h3> {file.map((x) => x.name).join(", ")}
-      <h2>{records}</h2>
+      <ul> {listItems}</ul>
     </div>
   );
 }
