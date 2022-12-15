@@ -1,11 +1,23 @@
-import React, { Component, useRef, useState, useEffect } from "react";
+import React, {
+  Component,
+  useRef,
+  useState,
+  useEffect,
+  useCallback,
+} from "react";
 import { json, Link } from "react-router-dom";
 // import "./BillManager.css";
+import { createWorker } from "tesseract.js";
 
 function BillManager() {
-  const [file, setFile] = useState([]);
+  const [file, setFile] = useState("");
   const [records, setRecords] = useState([]);
+  const [textResult, setTextResult] = useState("");
   const inputFile = useRef(null);
+  // const worker = createWorker();
+  let worker = null;
+
+  //This hook is used to display records from backend to the UI
   useEffect(() => {
     async function getRecords() {
       const response = await fetch(`http://localhost:5000/record/`);
@@ -21,22 +33,44 @@ function BillManager() {
       setRecords(records);
     }
     console.log(records);
-    getRecords();
+    //getRecords();
+    // return;
+  });
+  // This function extracts the text from the selected image file.
 
-    return;
-  }, [records.length]);
+  const convertImageToText = useCallback(async () => {
+    if (!file) return;
+
+    if (!worker) worker = await createWorker();
+    console.log("worker:", worker);
+    await worker.load();
+    await worker.loadLanguage("eng");
+    await worker.initialize("eng");
+    const { data } = await worker.recognize(file);
+    setTextResult(data.text);
+    console.log("Result:", data.text);
+  }, [file]);
+
+  //This useEffect is to convert the selected image to text
+  useEffect(() => {
+    convertImageToText();
+  }, [file, convertImageToText]);
+
+  // This function sets the selected input file to the input box.
+
   const handleChange = (e) => {
-    setFile([...file, e.target.files[0]]);
-    // This method fetches the records from the database.
+    if (e.target.files[0]) {
+      setFile(e.target.files[0]);
+    } else {
+      setFile(null);
+      setTextResult("");
+    }
   };
+  // This method fetches the records from the database.
   const listItems = records.map((record) => {
+    //JSON.stringify converts objects(retrieved from tbe database) to string.
     return <li key={record._id}>{JSON.stringify(record)}</li>;
   });
-  //const listItems[id,name,age]=records;
-  // function dataDisplay(recordArr) {
-  //   const data[id,name,age] = recordArr;
-  //   return data[];
-  // }
 
   return (
     <div>
@@ -47,9 +81,13 @@ function BillManager() {
         onChange={handleChange}
         ref={inputFile}
         hidden="true"
+        accept="image/*"
       ></input>
-      <h3>Selected Files:</h3> {file.map((x) => x.name).join(", ")}
+      <h3>Selected Files:</h3> {file.name}
+      {/* //This list items displayed are the records from the backend. */}
       <ul> {listItems}</ul>
+      {file && <img src={URL.createObjectURL(file)} alt="thumb" />}
+      {/* {textResult && { textResult }} */}
     </div>
   );
 }
