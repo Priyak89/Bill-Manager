@@ -13,6 +13,7 @@ function BillManager() {
   const [file, setFile] = useState("");
   const [records, setRecords] = useState([]);
   const [textResult, setTextResult] = useState("");
+  const [wordFound, setWordFound] = useState([]);
   const inputFile = useRef(null);
   // const worker = createWorker();
   let worker = null;
@@ -71,6 +72,13 @@ function BillManager() {
     //JSON.stringify converts objects(retrieved from tbe database) to string.
     return <li key={record._id}>{JSON.stringify(record)}</li>;
   });
+  function findMatchingWord() {
+    let word = textResult.match(/cyclone/gi);
+    for (let i = 0; i < word.length; i++) {
+      console.log(word[i]);
+    }
+    setWordFound(word ? word.length : 0);
+  }
 
   return (
     <div>
@@ -87,7 +95,9 @@ function BillManager() {
       {/* //This list items displayed are the records from the backend. */}
       <ul> {listItems}</ul>
       {file && <img src={URL.createObjectURL(file)} alt="thumb" />}
-      {/* {textResult && { textResult }} */}
+      {textResult && <div>{textResult}</div>}
+      <button onClick={findMatchingWord}>Find matching word</button>
+      <p>Word Found:{wordFound}</p>
     </div>
   );
 }
